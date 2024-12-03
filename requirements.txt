@@ -1,0 +1,30 @@
+# pip install -r requirements.txt
+
+# YOLOv8 --------------------------------------
+ultralytics
+
+# Streamlit -----------------------------------
+streamlit
+streamlit_autorefresh
+streamlit_webrtc
+ffmpeg
+
+# Intel optimization -------------------------
+torch
+intel-extension-for-pytorch 
+openvino
+openvino-dev
+
+# Base ----------------------------------------
+av
+numpy
+opencv-python-headless
+stqdm
+deep-sort-realtime
+
+#setuptools
+
+# Extras --- for tts
+ibm_cloud_sdk_core==3.15.3
+ibm_watson==6.0.0
+
