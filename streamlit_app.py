@@ -15,7 +15,6 @@ from stqdm import stqdm
 from collections import Counter
 import time
 
-import streamlit as st
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
 from model_utils import get_yolo, get_system_stat
@@ -29,7 +28,14 @@ import intel_extension_for_pytorch as ipex
 from pathlib import Path
 import openvino as ov
 
-
+import streamlit as st
+# setting page layout
+st.set_page_config(
+    page_title="Nightjars Dark Detector",
+    page_icon="🕵🏻‍♀️",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # colors for visualization for image visualization
 COLORS = [(56, 56, 255), (151, 157, 255), (31, 112, 255), (29, 178, 255), (49, 210, 207), (10, 249, 72), (23, 204, 146),
@@ -225,8 +231,8 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
 
 
 
-st.image("assets/nmainlogoo.png")
-
+st.image("assets/nsidelogoo.png")
+st.sidebar.image("assets/nsidelogoo.png")
 
 
 # @st.cache_resource
