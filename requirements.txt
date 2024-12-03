@@ -7,7 +7,6 @@ ultralytics
 streamlit
 streamlit_autorefresh
 streamlit_webrtc
-ffmpeg
 
 # Intel optimization -------------------------
 torch
