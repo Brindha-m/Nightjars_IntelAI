@@ -2,32 +2,32 @@ import os
 os.environ["MY_ENV_VARIABLE"] = "True"
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
+import pandas as pd
+import numpy as np
+
 import cv2
 import json
 import subprocess
-import numpy as np
-import pandas as pd
-import time
-from pathlib import Path
 
-from _collections import deque
 from deep_sort_realtime.deepsort_tracker import DeepSort
+from _collections import deque
 from stqdm import stqdm
 from collections import Counter
+import time
+
+import streamlit as st
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
-
 from model_utils import get_yolo, get_system_stat
 from streamlit_webrtc import RTCConfiguration, VideoTransformerBase, webrtc_streamer
 from DistanceEstimation import *
 from streamlit_autorefresh import st_autorefresh
-import streamlit as st
 
 import av
 import torch
 import intel_extension_for_pytorch as ipex
-from openvino.runtime import Core
-# import openvino as ov
+from pathlib import Path
+import openvino as ov
 
 
 
@@ -58,11 +58,6 @@ def result_to_json(result: Results, tracker=None):
                 'y_min': int(result.boxes.xyxy[idx][1]),
                 'x_max': int(result.boxes.xyxy[idx][2]),
                 'y_max': int(result.boxes.xyxy[idx][3]),
-                
-                # 'x_min': int(result.boxes.boxes[idx][0]),
-                # 'y_min': int(result.boxes.boxes[idx][1]),
-                # 'x_max': int(result.boxes.boxes[idx][2]),
-                # 'y_max': int(result.boxes.boxes[idx][3]),
             },
         } for idx in range(len_results)
     ]
@@ -142,7 +137,7 @@ def view_result_default(result: Results, result_list_json, centers=None, image=N
             image = cv2.addWeighted(image, 1, image_mask, ALPHA, 0)
         text = f"{result['class']} {result['object_id']}: {result['confidence']:.2f}" if 'object_id' in result else f"{result['class']}: {result['confidence']:.2f}"
         cv2.rectangle(image, (result['bbox']['x_min'], result['bbox']['y_min']), (result['bbox']['x_max'], result['bbox']['y_max']), class_color, 1)
-        (text_width, text_height), baseline = cv2.getTextSize(text, 0.90, 5)
+        (text_width, text_height), baseline = cv2.getTextSize(text, cv2.FONT_HERSHEY_DUPLEX, 0.90, 5)
         cv2.rectangle(image, (result['bbox']['x_min'], result['bbox']['y_min'] - text_height - baseline), (result['bbox']['x_min'] + text_width, result['bbox']['y_min']), class_color, -1)
         cv2.putText(image, text , (result['bbox']['x_min'], result['bbox']['y_min'] - baseline), cv2.FONT_HERSHEY_DUPLEX, 0.90, (255, 255, 255), 1)
         if 'object_id' in result and centers is not None:
@@ -172,7 +167,7 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
     original_image = frame.copy()
           
     gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    denoised_image = cv2.GaussianBlur(gray_image, (3, 3), 0)
+    denoised_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
     equalized_image = cv2.equalizeHist(denoised_image)
     clahe = cv2.createCLAHE(clipLimit=0.5, tileGridSize=(8, 8))
     enhanced_image = clahe.apply(equalized_image)
@@ -251,12 +246,12 @@ def load_model(model_path):
     # Load and return the YOLO model
     return YOLO(model_path)
 
+
 device = "CPU"
 model_path = "yolov8c_openvino_model" 
-model = YOLO("yolov8xcdark.pt")
-st.write("Optimized Openvino Yolov8c Models loaded successfully!")
-
 model_seg_path = "yolov8xcdark-seg.pt"
+model = load_model(model_path)
+st.write("Optimized Openvino Yolov8c Models loaded successfully!")
 model_seg = load_model(model_seg_path)
 
 
@@ -267,7 +262,7 @@ source_index = st.sidebar.selectbox("Select Input type", range(
 
 # Image detection section
 if source_index == 0:
-    st.header("Image Processing using YOLOv8")
+    st.header("Image Processing using YOLOv8c Dark Detector")
     image_file = st.file_uploader("Upload an image 🔽", type=["jpg", "jpeg", "png"])
     process_image_button = st.button("Detect")
     process_seg_button = st.button("Click here for Segmentation result")
@@ -282,7 +277,7 @@ if source_index == 0:
             img = cv2.imdecode(np.frombuffer(image_file.read(), np.uint8), 1)
             
             img, result_list_json = image_processing(img, model)
-            st.info(modelop)
+          
             st.success("✅ Task Detect : Detection using custom-trained v8 model")
             st.image(img, caption="Detected image", channels="BGR")     
             
@@ -290,6 +285,7 @@ if source_index == 0:
             class_fq = Counter(detected_classes)
             
             df_fq = pd.DataFrame(class_fq.items(), columns=['Class', 'Number'])
+          
             st.write("Class Frequency:")
             st.dataframe(df_fq)  
             
@@ -307,9 +303,8 @@ if source_index == 0:
             detected_classes = [item['class'] for item in result_list_json]
             class_fq = Counter(detected_classes)
             
-            # Create a DataFrame for class frequency
+            
             df_fq = pd.DataFrame(class_fq.items(), columns=['Class', 'Number'])
-          
             st.write("Class Frequency:")
             st.dataframe(df_fq)  
  
@@ -317,7 +312,7 @@ if source_index == 0:
 # Video & Live cam section
 if source_index == 1:
 
-    st.header("Video & Live Cam Processing using YOLOv8")
+    st.header("Video Detections using YOLOv8c Dark Detector")
     video_file = st.file_uploader("Upload a video", type=["mp4"])
     process_video_button = st.button("Process Video")
     if video_file is None and process_video_button:
@@ -344,7 +339,7 @@ if source_index == 1:
     
 
 if source_index == 2:
-    st.header("Live Stream Processing using YOLOv8")
+    st.header("Live Stream Processing using YOLOv8c Dark Detector")
     tab_webcam = st.tabs(["Webcam Detections"])
     p_time = 0
 
@@ -382,6 +377,9 @@ if source_index == 2:
             'Draw Thickness:', min_value=1,
             max_value=20, value=3
         )
+        
+        # Inference Mode
+        # Web-cam
         
         cam_options = st.selectbox('Webcam Channel',
                                         ('Select Channel', '0', '1', '2', '3'))
@@ -429,20 +427,20 @@ if source_index == 2:
                     fps = 1 / (c_time - p_time)
                     p_time = c_time
                         
-               
+                    # Current number of classes
                     # Current number of classes
                     detected_classes = [item['class'] for item in result_list_json]
                     class_fq = Counter(detected_classes)
                     df_fq = pd.DataFrame(class_fq.items(), columns=['Class', 'Number'])
 
-                    # Updating Inference results
+                        # Updating Inference results
                     get_system_stat(stframe1, stframe2, stframe3, fps, df_fq)
                     
                     
 
 
 if source_index == 3:
-    st.header("Live Stream Processing using YOLOv8")
+    st.header("Live Stream Processing using YOLOv8c Dark Detector")
     tab_rtsp = st.tabs(["RTSP Detections"])
     p_time = 0
 
@@ -564,7 +562,7 @@ class VideoTransformer(VideoTransformerBase):
 
 # Streamlit application
 if source_index == 4:
-    st.header("Live Stream Processing using YOLOv8")
+    st.header("Live Stream Processing using YOLOv8c Dark Detector")
     webcam_st = st.tabs(["St webcam"])
     p_time = 0
 
