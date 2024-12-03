@@ -250,7 +250,7 @@ def load_model(model_path):
 device = "CPU"
 model_path = "yolov8c_openvino_model" 
 model_seg_path = "yolov8xcdark-seg.pt"
-model = load_model(model_path)
+model = YOLO("yolov8xcdark.pt")
 st.write("Optimized Openvino Yolov8c Models loaded successfully!")
 model_seg = load_model(model_seg_path)
 
