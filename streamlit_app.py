@@ -250,7 +250,7 @@ def load_model(model_path):
 device = "CPU"
 model_path = "yolov8c_openvino_model" 
 model_seg_path = "yolov8xcdark-seg.pt"
-model = YOLO("yolov8c_openvino_model/")
+modelopti = YOLO("yolov8c_openvino_model/")
 st.write("Optimized Openvino Yolov8c Models loaded successfully!")
 model_seg = load_model(model_seg_path)
 
@@ -276,7 +276,7 @@ if source_index == 0:
             st.sidebar.image(image_file, caption="Uploaded image")
             img = cv2.imdecode(np.frombuffer(image_file.read(), np.uint8), 1)
             
-            img, result_list_json = image_processing(img, model)
+            img, result_list_json = image_processing(img, modelopti)
           
             st.success("✅ Task Detect : Detection using custom-trained v8 model")
             st.image(img, caption="Detected image", channels="BGR")     
