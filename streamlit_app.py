@@ -29,13 +29,13 @@ from pathlib import Path
 import openvino as ov
 
 import streamlit as st
-# setting page layout
-st.set_page_config(
-    page_title="Nightjars Dark Detector",
-    page_icon="🕵🏻‍♀️",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# # setting page layout
+# st.set_page_config(
+#     page_title="Nightjars Dark Detector",
+#     page_icon="🕵🏻‍♀️",
+#     layout="wide",
+#     initial_sidebar_state="expanded"
+# )
 
 # colors for visualization for image visualization
 COLORS = [(56, 56, 255), (151, 157, 255), (31, 112, 255), (29, 178, 255), (49, 210, 207), (10, 249, 72), (23, 204, 146),
