@@ -257,7 +257,7 @@ model = YOLO("yolov8c_openvino_model")
 st.write("Optimized Openvino Yolov8c Models loaded successfully!")
 
 model_seg_path = "yolov8xcdark-seg.pt"
-model_seg = YOLO("yolov8c-seg_openvino_model")
+model_seg = load_model(model_seg_path)
 
 
 source = ("Image Detection📸", "Video Detections📽️", "Live Camera Detection🤳🏻","RTSP","MOBILE CAM")
