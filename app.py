@@ -26,7 +26,7 @@ import streamlit as st
 import av
 import torch
 import intel_extension_for_pytorch as ipex
-# from openvino.runtime import Core
+from openvino.runtime import Core
 # import openvino as ov
 
 
