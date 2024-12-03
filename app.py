@@ -172,7 +172,7 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
     original_image = frame.copy()
           
     gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    denoised_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
+    denoised_image = cv2.GaussianBlur(gray_image, (3, 3), 0)
     equalized_image = cv2.equalizeHist(denoised_image)
     clahe = cv2.createCLAHE(clipLimit=0.5, tileGridSize=(8, 8))
     enhanced_image = clahe.apply(equalized_image)
@@ -253,11 +253,11 @@ def load_model(model_path):
 
 device = "CPU"
 model_path = "yolov8c_openvino_model" 
-model = YOLO("yolov8c_openvino_model" )
+model = YOLO("yolov8c_openvino_model")
 st.write("Optimized Openvino Yolov8c Models loaded successfully!")
 
 model_seg_path = "yolov8xcdark-seg.pt"
-model_seg = load_model(model_seg_path)
+model_seg = YOLO("yolov8c-seg_openvino_model")
 
 
 source = ("Image Detection📸", "Video Detections📽️", "Live Camera Detection🤳🏻","RTSP","MOBILE CAM")
