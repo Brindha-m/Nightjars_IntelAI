@@ -1,33 +1,35 @@
 import os
 os.environ["MY_ENV_VARIABLE"] = "True"
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+
 import cv2
 import json
 import subprocess
 import numpy as np
 import pandas as pd
+import time
+from pathlib import Path
+
 from _collections import deque
 from deep_sort_realtime.deepsort_tracker import DeepSort
 from stqdm import stqdm
 from collections import Counter
-import time
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
-import json
+
 from model_utils import get_yolo, get_system_stat
 from streamlit_webrtc import RTCConfiguration, VideoTransformerBase, webrtc_streamer
 from DistanceEstimation import *
 from streamlit_autorefresh import st_autorefresh
 import streamlit as st
+
 import av
-from tts import *
 import torch
 import intel_extension_for_pytorch as ipex
-from pathlib import Path
 # from openvino.runtime import Core
-import openvino as ov
+# import openvino as ov
 
 
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 # colors for visualization for image visualization
 COLORS = [(56, 56, 255), (151, 157, 255), (31, 112, 255), (29, 178, 255), (49, 210, 207), (10, 249, 72), (23, 204, 146),
@@ -170,7 +172,7 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
     original_image = frame.copy()
           
     gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    denoised_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
+    denoised_image = cv2.GaussianBlur(gray_image, (3, 3), 0)
     equalized_image = cv2.equalizeHist(denoised_image)
     clahe = cv2.createCLAHE(clipLimit=0.5, tileGridSize=(8, 8))
     enhanced_image = clahe.apply(equalized_image)
@@ -232,42 +234,30 @@ st.image("assets/nmainlogoo.png")
 
 
 
-@st.cache_resource
-def load_model(model_path, device):
-    core = ov.Core()
-    ov_model = core.read_model(model_path)
-    ov_config = {}
-    if device.value != "CPU":
-        ov_model.reshape({0: [1, 3, 1024, 1024]})
-    if "GPU" in device.value or ("AUTO" in device.value and "GPU" in core.available_devices):
-        ov_config = {"GPU_DISABLE_WINOGRAD_CONVOLUTION": "YES"}
-    compiled_ov_model = core.compile_model(ov_model, device.value, ov_config)
-    return compiled_ov_model
+# @st.cache_resource
+# def load_model(model_path, device):
+#     core = ov.Core()
+#     ov_model = core.read_model(model_path)
+#     ov_config = {}
+#     if device.value != "CPU":
+#         ov_model.reshape({0: [1, 3, 1024, 1024]})
+#     if "GPU" in device.value or ("AUTO" in device.value and "GPU" in core.available_devices):
+#         ov_config = {"GPU_DISABLE_WINOGRAD_CONVOLUTION": "YES"}
+#     compiled_ov_model = core.compile_model(ov_model, device.value, ov_config)
+#     return compiled_ov_model
 
 @st.cache_resource
-def load_seg_model(model_path):
+def load_model(model_path):
     # Load and return the YOLO model
     return YOLO(model_path)
 
-
-# Ensure the correct paths to the .xml and .bin files
-# model_path = Path(f"yolov8x_openvino_model/yolov8c.xml")
 device = "CPU"
-model_path = 'yolov8c_openvino_model/yolov8c.xml' 
-modelop = YOLO("yolov8c_openvino_model")
+model_path = "yolov8c_openvino_model" 
+model = YOLO("yolov8c_openvino_model")
 st.write("Optimized Openvino Yolov8c Models loaded successfully!")
-# Load the model
-try:
-    modelop = load_model(model_path, device)
-    st.write("Optimized Openvino!")
-          
-except Exception as e:
-    print(f"Error loading model: {e}")
 
-
-# Cache seg model paths
 model_seg_path = "yolov8xcdark-seg.pt"
-model1 = load_seg_model(model_seg_path)
+model_seg = YOLO("yolov8c-seg_openvino_model")
 
 
 source = ("Image Detection📸", "Video Detections📽️", "Live Camera Detection🤳🏻","RTSP","MOBILE CAM")
@@ -291,11 +281,7 @@ if source_index == 0:
             st.sidebar.image(image_file, caption="Uploaded image")
             img = cv2.imdecode(np.frombuffer(image_file.read(), np.uint8), 1)
             
-            # For detection with bounding boxes
-            # print(f"Used Custom reframed YOLOv8 model: {model_select}")
-           
-            
-            img, result_list_json = image_processing(img, modelop)
+            img, result_list_json = image_processing(img, model)
             st.info(modelop)
             st.success("✅ Task Detect : Detection using custom-trained v8 model")
             st.image(img, caption="Detected image", channels="BGR")     
@@ -303,9 +289,7 @@ if source_index == 0:
             detected_classes = [item['class'] for item in result_list_json]
             class_fq = Counter(detected_classes)
             
-            # Create a DataFrame for class frequency
             df_fq = pd.DataFrame(class_fq.items(), columns=['Class', 'Number'])
-          
             st.write("Class Frequency:")
             st.dataframe(df_fq)  
             
@@ -316,7 +300,7 @@ if source_index == 0:
             img = cv2.imdecode(np.frombuffer(image_file.read(), np.uint8), 1) 
            
             ## for detection with bb & segmentation masks
-            img, result_list_json = image_processing(img, modelop)
+            img, result_list_json = image_processing(img, model_seg)
             st.success("✅ Task Segment: Segmentation using v8 model")
             st.image(img, caption="Segmented image", channels="BGR")
 
@@ -399,9 +383,6 @@ if source_index == 2:
             max_value=20, value=3
         )
         
-        # Inference Mode
-        # Web-cam
-        
         cam_options = st.selectbox('Webcam Channel',
                                         ('Select Channel', '0', '1', '2', '3'))
     
@@ -448,13 +429,13 @@ if source_index == 2:
                     fps = 1 / (c_time - p_time)
                     p_time = c_time
                         
-                    # Current number of classes
+               
                     # Current number of classes
                     detected_classes = [item['class'] for item in result_list_json]
                     class_fq = Counter(detected_classes)
                     df_fq = pd.DataFrame(class_fq.items(), columns=['Class', 'Number'])
 
-                        # Updating Inference results
+                    # Updating Inference results
                     get_system_stat(stframe1, stframe2, stframe3, fps, df_fq)
                     
                     
