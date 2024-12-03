@@ -11,8 +11,7 @@ streamlit_webrtc
 # Intel optimization -------------------------
 torch
 intel-extension-for-pytorch 
-openvino
-openvino-dev
+openvino==2024.5.0
 
 # Base ----------------------------------------
 av
