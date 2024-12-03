@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-from tts import *
+# from tts import *
 from ultralytics import YOLO
 import streamlit as st
 
