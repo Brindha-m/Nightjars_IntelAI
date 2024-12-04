@@ -181,9 +181,9 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
     processed_image = image
           
     st.image(processed_image, caption="Processed image", channels="BGR")
-             
-    results = model.predict(processed_image)
-    # results = infer_request.get_output_tensor().data 
+    input_data = np.expand_dims(np.transpose(processed_image, (2, 0, 1)), axis=0).astype(np.float32) / 255.0
+    results = model([input_data])[0]
+    # results = model.predict(processed_image)
     result_list_json = result_to_json(results[0], tracker=tracker)
     result_image = image_viewer(results[0], result_list_json, centers=centers, image=original_image)
     return result_image, result_list_json
@@ -236,7 +236,7 @@ st.sidebar.image("assets/nsidelogoo.png")
 
 
 # @st.cache_resource
-# def load_model(model_path, device):
+# def load_vino_model(model_path, device):
 #     core = ov.Core()
 #     ov_model = core.read_model(model_path)
 #     ov_config = {}
@@ -247,6 +247,28 @@ st.sidebar.image("assets/nsidelogoo.png")
 #     compiled_ov_model = core.compile_model(ov_model, device.value, ov_config)
 #     return compiled_ov_model
 
+import torch
+import openvino.runtime as ov
+
+
+def load_vino_model(model_path, device="CPU"):
+    core = ov.Core()
+    ov_model = core.read_model(model_path)
+    ov_config = {}
+    if device != "CPU":
+        ov_model.reshape({0: [1, 3, 640, 640]})
+    if "GPU" in device or ("AUTO" in device and "GPU" in core.available_devices):
+        ov_config = {"GPU_DISABLE_WINOGRAD_CONVOLUTION": "YES"}
+
+    compiled_model = core.compile_model(ov_model, device, ov_config)
+
+    return compiled_model
+
+
+def infer_with_vino_model(compiled_model, *args):
+    result = compiled_model(args)
+    return torch.from_numpy(result[0])
+
 @st.cache_resource
 def load_model(model_path):
     # Load and return the YOLO model
@@ -254,11 +276,12 @@ def load_model(model_path):
 
 
 device = "CPU"
-model_path = "yolov8c_openvino_model" 
+model_vino_path = Path("yolov8c_openvino_model/yolov8c.xml")
+model_openvino = load_vino_model(model_path, device)
 # model_path = "yolov8xcdark.pt" 
-model_seg_path = "yolov8xcdark-seg.pt"
-modelopti = load_model(model_path)
+# model = load_model(model_path)
 st.write("Optimized Openvino Yolov8c Models loaded successfully!")
+model_seg_path = "yolov8xcdark-seg.pt"
 model_seg = load_model(model_seg_path)
 
 
@@ -283,7 +306,7 @@ if source_index == 0:
             st.sidebar.image(image_file, caption="Uploaded image")
             img = cv2.imdecode(np.frombuffer(image_file.read(), np.uint8), 1)
             
-            img, result_list_json = image_processing(img, modelopti)
+            img, result_list_json = image_processing(img, model_openvino)
           
             st.success("✅ Task Detect : Detection using custom-trained v8 model")
             st.image(img, caption="Detected image", channels="BGR")     
