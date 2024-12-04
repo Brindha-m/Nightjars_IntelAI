@@ -247,8 +247,6 @@ st.sidebar.image("assets/nsidelogoo.png")
 #     compiled_ov_model = core.compile_model(ov_model, device.value, ov_config)
 #     return compiled_ov_model
 
-import torch
-import openvino.runtime as ov
 
 
 def load_vino_model(model_path, device="CPU"):
@@ -277,7 +275,7 @@ def load_model(model_path):
 
 device = "CPU"
 model_vino_path = Path("yolov8c_openvino_model/yolov8c.xml")
-model_openvino = load_vino_model(model_path, device)
+model_openvino = load_vino_model(model_vino_path, device)
 # model_path = "yolov8xcdark.pt" 
 # model = load_model(model_path)
 st.write("Optimized Openvino Yolov8c Models loaded successfully!")
