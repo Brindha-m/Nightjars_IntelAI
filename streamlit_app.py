@@ -175,11 +175,10 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
     gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     denoised_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
     st.image(denoised_image)
-    equalized_image = cv2.equalizeHist(denoised_image)
-    st.image(equalized_image)
-    clahe = cv2.createCLAHE(clipLimit=0.5, tileGridSize=(8, 8))
-    st.image(clahe)
-    enhanced_image = clahe.apply(equalized_image)
+    enhanced_image = cv2.equalizeHist(denoised_image)
+    # st.image(equalized_image)
+    # clahe = cv2.createCLAHE(clipLimit=0.5, tileGridSize=(8, 8))
+    # enhanced_image = clahe.apply(equalized_image)
     image = cv2.merge([enhanced_image, enhanced_image, enhanced_image])    
     processed_image = image
           
