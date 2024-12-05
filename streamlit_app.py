@@ -276,7 +276,7 @@ def load_model(model_path):
 device = "CPU"
 
 det_model = YOLO("yolov8xcdark.pt")
-det_model_path = Path("openvino/yolov8xcdark_openvino_model/")
+det_model_path = Path("/mount/src/nightjars_intelai/yolov8xcdark_openvino_model/")
 if not det_model_path.exists():
     det_model.export(format="openvino", dynamic=True, half=True)
 model_vino_path = Path("yolov8xcdark_openvino_model")
