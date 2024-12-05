@@ -274,12 +274,20 @@ def load_model(model_path):
 
 
 device = "CPU"
+
+det_model_path = Path("openvino/yolov8xcdark_openvino_model/")
+if not det_model_path.exists():
+    det_model.export(format="openvino", dynamic=True, half=True)
 model_vino_path = Path("yolov8xcdark_openvino_model")
-model_openvino = YOLO(model_vino_path)
+model_openvino = YOLO(det_model_path)
 
 # model_openvino = load_vino_model(model_vino_path, device)
+
+
 # model_path = "yolov8xcdark.pt" 
 # model = load_model(model_path)
+
+          
 st.write("Optimized Openvino Yolov8c Models loaded successfully!")
 model_seg_path = "yolov8xcdark-seg.pt"
 model_seg = load_model(model_seg_path)
