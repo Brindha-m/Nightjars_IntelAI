@@ -275,6 +275,7 @@ def load_model(model_path):
 
 device = "CPU"
 
+det_model = "yolov8xcdark.pt"
 det_model_path = Path("openvino/yolov8xcdark_openvino_model/")
 if not det_model_path.exists():
     det_model.export(format="openvino", dynamic=True, half=True)
