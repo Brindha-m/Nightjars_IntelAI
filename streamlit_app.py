@@ -235,20 +235,6 @@ st.image("assets/nsidelogoo.png")
 st.sidebar.image("assets/nsidelogoo.png")
 
 
-# @st.cache_resource
-# def load_vino_model(model_path, device):
-#     core = ov.Core()
-#     ov_model = core.read_model(model_path)
-#     ov_config = {}
-#     if device.value != "CPU":
-#         ov_model.reshape({0: [1, 3, 1024, 1024]})
-#     if "GPU" in device.value or ("AUTO" in device.value and "GPU" in core.available_devices):
-#         ov_config = {"GPU_DISABLE_WINOGRAD_CONVOLUTION": "YES"}
-#     compiled_ov_model = core.compile_model(ov_model, device.value, ov_config)
-#     return compiled_ov_model
-
-
-
 def load_vino_model(model_path, device="CPU"):
     core = ov.Core()
     ov_model = core.read_model(model_path)
@@ -285,8 +271,8 @@ model_openvino = YOLO(det_model_path)
 # model_openvino = load_vino_model(model_vino_path, device)
 
 
-# model_path = "yolov8xcdark.pt" 
-# model = load_model(model_path)
+model_path = "yolov8xcdark.pt" 
+model = load_model(model_path)
 
           
 st.write("Optimized Openvino Yolov8c Models loaded successfully!")
@@ -315,7 +301,7 @@ if source_index == 0:
             st.sidebar.image(image_file, caption="Uploaded image")
             img = cv2.imdecode(np.frombuffer(image_file.read(), np.uint8), 1)
             
-            img, result_list_json = image_processing(img, model_openvino)
+            img, result_list_json = image_processing(img, model)
           
             st.success("✅ Task Detect : Detection using custom-trained v8 model")
             st.image(img, caption="Detected image", channels="BGR")     
