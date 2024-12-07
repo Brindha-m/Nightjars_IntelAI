@@ -272,11 +272,6 @@ def load_model(model_path):
 
 device = "CPU"
 
-# det_model = YOLO("yolov8xcdark.pt")
-# det_model_path = Path("yolov8xcdark_openvino_model/")
-# if not det_model_path.exists():
-#     det_model.export(format="openvino", dynamic=True, half=True)
-
 model_vino_path = Path("yolov8xcdark_openvino_model")
 model_openvino = load_model(model_vino_path)
 
@@ -367,12 +362,6 @@ if source_index == 1:
             with open(result_video_json_file, "r") as f:
                 result_json = json.load(f)
             st.json(result_json)
-
-              
-
-            # video_bytes = open(video_file_out, 'rb').read()
-            # st.video(video_bytes)
-
     
 
 if source_index == 2:
