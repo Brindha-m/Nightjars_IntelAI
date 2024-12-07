@@ -261,12 +261,13 @@ def load_model(model_path):
 
 device = "CPU"
 
-det_model = YOLO("yolov8xcdark.pt")
-det_model_path = Path("/mount/src/nightjars_intelai/yolov8xcdark_openvino_model/")
-if not det_model_path.exists():
-    det_model.export(format="openvino", dynamic=True, half=True)
+# det_model = YOLO("yolov8xcdark.pt")
+# det_model_path = Path("yolov8xcdark_openvino_model/")
+# if not det_model_path.exists():
+#     det_model.export(format="openvino", dynamic=True, half=True)
+
 model_vino_path = Path("yolov8xcdark_openvino_model")
-model_openvino = YOLO(det_model_path)
+model_openvino = load_model(model_vino_path)
 
 # model_openvino = load_vino_model(model_vino_path, device)
 
@@ -301,7 +302,7 @@ if source_index == 0:
             st.sidebar.image(image_file, caption="Uploaded image")
             img = cv2.imdecode(np.frombuffer(image_file.read(), np.uint8), 1)
             
-            img, result_list_json = image_processing(img, model)
+            img, result_list_json = image_processing(img, model_openvino)
           
             st.success("✅ Task Detect : Detection using custom-trained v8 model")
             st.image(img, caption="Detected image", channels="BGR")     
