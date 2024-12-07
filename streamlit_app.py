@@ -213,7 +213,7 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
         result_list_json = result_to_json(result, tracker=tracker)
         result_image = image_viewer(result, result_list_json, centers=centers)
         
-        video_writer.write(result_image.tobytes)
+        video_writer.write(result_image.tobytes())
         result_list.append(result_list_json)
         frame_count += 1
 
