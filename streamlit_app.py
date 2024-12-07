@@ -187,18 +187,6 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
 
 
 def video_processing(video_file, model, image_viewer=view_result_default, tracker=None, centers=None):
-    """
-    Process video file using ultralytics YOLOv8 model.
-    Parameters:
-        video_file: video file path
-        model: ultralytics YOLOv8 model
-        image_viewer: function to visualize result
-        tracker: DeepSort tracker
-        centers: list of deque of center points of bounding boxes
-    Returns:
-        video_file_name_out: name of output video file
-        result_video_json_file: file containing detection result
-    """
     results = model.predict(video_file)
     model_name = model.ckpt_path.split('/')[-1].split('.')[0]
 
@@ -207,7 +195,6 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
     video_file_name_out = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_file))[0]}_{model_name}_output.mp4")
     result_video_json_file = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_file))[0]}_{model_name}_output.json")
     
-
     for file_path in [video_file_name_out, result_video_json_file]:
         if os.path.exists(file_path):
             os.remove(file_path)
@@ -215,10 +202,8 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
     json_file = open(result_video_json_file, 'w')
     first_frame = results[0].orig_img
     height, width = first_frame.shape[:2]
-    
-    # Use ffmpeg directly for video writing
-    process = subprocess.Popen(['ffmpeg', '-y', '-f', 'rawvideo', '-vcodec','rawvideo', '-s', f'{width}x{height}', '-pix_fmt', 'bgr24', '-r', '30', '-i', '-', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', video_file_name_out], stdin=subprocess.PIPE)
-    
+    video_writer = cv2.VideoWriter(video_file_name_out, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
+
     result_list = []
     frame_count = 0
 
@@ -226,23 +211,20 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
         result_list_json = result_to_json(result, tracker=tracker)
         result_image = image_viewer(result, result_list_json, centers=centers)
         
-        # Write frame to ffmpeg process
-        process.stdin.write(result_image.tobytes())
+        video_writer.write(result_image)
         result_list.append(result_list_json)
         frame_count += 1
 
     json.dump(result_list, json_file, indent=2)
     json_file.close()
 
-    process.stdin.close()
-    process.wait()
+    video_writer.release()
 
     if frame_count == 0 or os.path.getsize(video_file_name_out) == 0:
         raise FileNotFoundError(f"The video file {video_file_name_out} was not created or is empty.")
 
     return video_file_name_out, result_video_json_file
-
-
+          
 st.image("assets/nsidelogoo.png")
 st.sidebar.image("assets/nsidelogoo.png")
 
