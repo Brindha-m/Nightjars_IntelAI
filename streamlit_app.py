@@ -342,7 +342,7 @@ if source_index == 1:
             os.remove(video_file.name)
             st.write("Processing video...")
             st.write(video_file_out)
-            st.video(str(video_file_out))
+            st.video("{video_file_out}")
             with open(result_video_json_file, "r") as f:
                 result_json = json.load(f)
             st.json(result_json)
