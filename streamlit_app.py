@@ -31,12 +31,12 @@ import openvino as ov
 
 import streamlit as st
 # # setting page layout
-# st.set_page_config(
-#     page_title="Nightjars Dark Detector",
-#     page_icon="🕵🏻‍♀️",
-#     layout="wide",
-#     initial_sidebar_state="expanded"
-# )
+st.set_page_config(
+    page_title="Nightjars Dark Detector",
+    page_icon="🕵🏻‍♀️",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # colors for visualization for image visualization
 COLORS = [(56, 56, 255), (151, 157, 255), (31, 112, 255), (29, 178, 255), (49, 210, 207), (10, 249, 72), (23, 204, 146),
@@ -342,11 +342,7 @@ if source_index == 1:
             video_file_out, result_video_json_file = video_processing(video_file.name, model, tracker=tracker, centers=centers)
             os.remove(video_file.name)
             st.write("Processing video...")
-            st.write(video_file_out)
-            temp_dir = tempfile.mkdtemp()
-            temp_video_path = os.path.join(temp_dir, "output.mp4")
-            shutil.copy(video_file_out, temp_video_path)
-            st.video(temp_video_path)
+            
             st.video(video_file_out)
             with open(result_video_json_file, "r") as f:
                 result_json = json.load(f)
