@@ -203,7 +203,7 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
     first_frame = results[0].orig_img
     height, width = first_frame.shape[:2]
     
-     video_writer = cv2.VideoWriter(video_file_name_out, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
+    video_writer = cv2.VideoWriter(video_file_name_out, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
     # process = subprocess.Popen(['ffmpeg', '-y', '-f', 'rawvideo', '-vcodec','rawvideo', '-s', f'{width}x{height}', '-pix_fmt', 'bgr24', '-r', '30', '-i', '-', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', video_file_name_out], stdin=subprocess.PIPE)
 
     result_list = []
