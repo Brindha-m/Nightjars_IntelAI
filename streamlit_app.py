@@ -136,7 +136,6 @@ def view_result_default(result: Results, result_list_json, centers=None, image=N
           
     for result in result_list_json:
         class_color = COLORS[result['class_id'] % len(COLORS)]
-        # fontFace = "/content/drive/MyDrive/Yolov8_Nightjars/models/ahronbd.ttf"
         fontScale = 1
         if 'mask' in result:
             image_mask = np.stack([np.array(result['mask']) * class_color[0], np.array(result['mask']) * class_color[1], np.array(result['mask']) * class_color[2]], axis=-1).astype(np.uint8)
@@ -191,45 +190,59 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
 
 def video_processing(video_file, model, image_viewer=view_result_default, tracker=None, centers=None):
     """
-    Process video file using ultralytics YOLOv8 model and possibly DeepSort tracker if it is provided
+    Process video file using ultralytics YOLOv8 model.
     Parameters:
-        video_file: video file
+        video_file: video file path
         model: ultralytics YOLOv8 model
-        image_viewer: function to visualize result, default is view_result_default, can be view_result_ultralytics
+        image_viewer: function to visualize result
         tracker: DeepSort tracker
         centers: list of deque of center points of bounding boxes
     Returns:
         video_file_name_out: name of output video file
-        result_video_json_file: file containing detection result in json format
+        result_video_json_file: file containing detection result
     """
     results = model.predict(video_file)
     model_name = model.ckpt_path.split('/')[-1].split('.')[0]
+
     output_folder = os.path.join('output_videos', os.path.splitext(os.path.basename(video_file))[0])
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    os.makedirs(output_folder, exist_ok=True)
     video_file_name_out = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_file))[0]}_{model_name}_output.mp4")
-    if os.path.exists(video_file_name_out):
-        os.remove(video_file_name_out)
     result_video_json_file = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_file))[0]}_{model_name}_output.json")
-    if os.path.exists(result_video_json_file):
-        os.remove(result_video_json_file)
-    json_file = open(result_video_json_file, 'a')
-    temp_file = 'temp.mp4'
-    video_writer = cv2.VideoWriter(temp_file, cv2.VideoWriter_fourcc(*'mp4v'), 30, (results[0].orig_img.shape[1], results[0].orig_img.shape[0]))
-    json_file.write('[\n')
-    for result in stqdm(results, desc=f"Processing video"):
+    
+
+    for file_path in [video_file_name_out, result_video_json_file]:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+    
+    json_file = open(result_video_json_file, 'w')
+    first_frame = results[0].orig_img
+    height, width = first_frame.shape[:2]
+    
+    # Use ffmpeg directly for video writing
+    process = subprocess.Popen(['ffmpeg', '-y', '-f', 'rawvideo', '-vcodec','rawvideo', '-s', f'{width}x{height}', '-pix_fmt', 'bgr24', '-r', '30', '-i', '-', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', video_file_name_out], stdin=subprocess.PIPE)
+    
+    result_list = []
+    frame_count = 0
+
+    for result in stqdm(results, desc="Processing video"):
         result_list_json = result_to_json(result, tracker=tracker)
         result_image = image_viewer(result, result_list_json, centers=centers)
-        video_writer.write(result_image)
-        json.dump(result_list_json, json_file, indent=2)
-        json_file.write(',\n')
-    json_file.write(']')
-    video_writer.release()
-    subprocess.call(args=f"ffmpeg -i {os.path.join('.', temp_file)} -c:v libx264 {os.path.join('.', video_file_name_out)}".split(" "))
-    os.remove(temp_file)
+        
+      
+        process.stdin.write(result_image.tobytes())
+        result_list.append(result_list_json)
+        frame_count += 1
+
+    json.dump(result_list, json_file, indent=2)
+    json_file.close()
+
+    process.stdin.close()
+    process.wait()
+
+    if frame_count == 0 or os.path.getsize(video_file_name_out) == 0:
+        raise FileNotFoundError(f"The video file {video_file_name_out} was not created or is empty.")
+
     return video_file_name_out, result_video_json_file
-
-
 
 st.image("assets/nsidelogoo.png")
 st.sidebar.image("assets/nsidelogoo.png")
