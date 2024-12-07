@@ -28,15 +28,8 @@ import torch
 import intel_extension_for_pytorch as ipex
 from pathlib import Path
 import openvino as ov
-
 import streamlit as st
-# # setting page layout
-st.set_page_config(
-    page_title="Nightjars Dark Detector",
-    page_icon="🕵🏻‍♀️",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+
 
 # colors for visualization for image visualization
 COLORS = [(56, 56, 255), (151, 157, 255), (31, 112, 255), (29, 178, 255), (49, 210, 207), (10, 249, 72), (23, 204, 146),
@@ -253,6 +246,7 @@ def load_model(model_path):
     # Load and return the YOLO model
     return YOLO(model_path)
 
+st.set_page_config(page_title="Nightjars Dark Detector", page_icon="🕵🏻‍♀️",layout="wide",initial_sidebar_state="expanded")
 
 device = "CPU"
 
@@ -577,15 +571,8 @@ if source_index == 4:
     webcam_st = st.tabs(["St webcam"])
     p_time = 0
 
-    # RTC_CONFIGURATION = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
+    RTC_CONFIGURATION = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
 
-    RTC_CONFIGURATION = RTCConfiguration({
-              "iceServers": [
-                  {"urls": ["stun:openrelay.metered.ca:80"]},  # Free public STUN server
-                  {"urls": ["turn:openrelay.metered.ca:80"], "username": "user", "credential": "pass"}  # Example TURN server
-              ]
-          })
-          
     count = st_autorefresh(interval=4500, limit=1000000, key="fizzbuzzcounter")
     try:
       webrtc_streamer(
@@ -595,9 +582,5 @@ if source_index == 4:
     )
     except Exception as e:
       st.error(f"Error initializing WebRTC: {e}")
-    # webrtc_streamer(
-    #     key="test",
-    #     media_stream_constraints={"video": True, "audio": False},
-    #     video_processor_factory=VideoTransformer
-    # )
+   
     st.cache_data.clear()
