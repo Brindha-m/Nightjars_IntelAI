@@ -199,14 +199,6 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
         video_file_name_out: name of output video file
         result_video_json_file: file containing detection result
     """
-    try:
-      subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True)
-    except FileNotFoundError:
-    # Install ffmpeg if not found
-      st.info("Installing ffmpeg...")  # Inform the user
-              
-    subprocess.run(['apt-get', 'update', '&&', 'apt-get', 'install', '-y', 'ffmpeg'], capture_output=True, check=True)
-    st.info("ffmpeg installed successfully!")
     results = model.predict(video_file)
     model_name = model.ckpt_path.split('/')[-1].split('.')[0]
 
