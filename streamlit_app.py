@@ -246,8 +246,6 @@ def load_model(model_path):
     # Load and return the YOLO model
     return YOLO(model_path)
 
-st.set_page_config(page_title="Nightjars Dark Detector", page_icon="🕵🏻‍♀️",layout="wide",initial_sidebar_state="expanded")
-
 device = "CPU"
 
 model_vino_path = Path("yolov8xcdark_openvino_model")
