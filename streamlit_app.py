@@ -302,7 +302,7 @@ if source_index == 0:
             st.sidebar.image(image_file, caption="Uploaded image")
             img = cv2.imdecode(np.frombuffer(image_file.read(), np.uint8), 1)
             
-            img, result_list_json = image_processing(img, model_openvino)
+            img, result_list_json = image_processing(img, model)
           
             st.success("✅ Task Detect : Detection using custom-trained v8 model")
             st.image(img, caption="Detected image", channels="BGR")     
