@@ -14,6 +14,7 @@ from _collections import deque
 from stqdm import stqdm
 from collections import Counter
 import time
+import shutil
 
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
@@ -342,7 +343,11 @@ if source_index == 1:
             os.remove(video_file.name)
             st.write("Processing video...")
             st.write(video_file_out)
-            st.video("{video_file_out}")
+            temp_dir = tempfile.mkdtemp()
+            temp_video_path = os.path.join(temp_dir, "output.mp4")
+            shutil.copy(video_file_out, temp_video_path)
+            st.video(temp_video_path)
+            st.video(video_file_out)
             with open(result_video_json_file, "r") as f:
                 result_json = json.load(f)
             st.json(result_json)
