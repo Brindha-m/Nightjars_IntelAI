@@ -6,9 +6,9 @@
 
 <br>
 
-> 👉🏻 [Colab notebook🔗](https://colab.research.google.com/drive/1oVe-88LOAtx-HLJsvrhuNWzKaY4QZ2uE?usp=sharing)
+### > 👉🏻 [Colab notebook🔗](https://colab.research.google.com/drive/1oVe-88LOAtx-HLJsvrhuNWzKaY4QZ2uE?usp=sharing)
 
-> 👉🏻 [Jupyter notebook intel® tiber™ ai developer cloud 🔗](https://jupyter-batch-us-region-1.cloud.intel.com/hub/user-redirect/lab/tree/Nightjars_intel_bindascode.ipynb)
+### > 👉🏻 [Jupyter notebook intel® tiber™ ai developer cloud 🔗](https://jupyter-batch-us-region-1.cloud.intel.com/hub/user-redirect/lab/tree/Nightjars_intel_bindascode.ipynb)
 
 **NightJars**, an object recognition system in low-illuminance conditions using Improved (Yolov8) YOLOv8cdark architecture and Intel Optimization Tools with live distance estimation, tracking and count of the objects.
 
@@ -63,4 +63,4 @@ Start the Streamlit app using the following command:
 ---
 
 
-Give it a Try [Nightjars](https://nightjars-brindha.streamlit.app/)🌐 
+## Give it a Try [Nightjars](https://nightjars-brindha.streamlit.app/)🌐 
