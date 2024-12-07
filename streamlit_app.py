@@ -202,7 +202,9 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
     json_file = open(result_video_json_file, 'w')
     first_frame = results[0].orig_img
     height, width = first_frame.shape[:2]
-    video_writer = cv2.VideoWriter(video_file_name_out, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
+    
+     video_writer = cv2.VideoWriter(video_file_name_out, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
+    # process = subprocess.Popen(['ffmpeg', '-y', '-f', 'rawvideo', '-vcodec','rawvideo', '-s', f'{width}x{height}', '-pix_fmt', 'bgr24', '-r', '30', '-i', '-', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', video_file_name_out], stdin=subprocess.PIPE)
 
     result_list = []
     frame_count = 0
@@ -211,7 +213,7 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
         result_list_json = result_to_json(result, tracker=tracker)
         result_image = image_viewer(result, result_list_json, centers=centers)
         
-        video_writer.write(result_image)
+        video_writer.write(result_image.tobytes)
         result_list.append(result_list_json)
         frame_count += 1
 
