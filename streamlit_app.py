@@ -180,8 +180,6 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
     processed_image = image
           
     st.image(processed_image, caption="Processed image", channels="BGR")
-    # input_data = np.expand_dims(np.transpose(processed_image, (2, 0, 1)), axis=0).astype(np.float32) / 255.0
-    # results = model([input_data])[0]
     results = model.predict(processed_image)
     result_list_json = result_to_json(results[0], tracker=tracker)
     result_image = image_viewer(results[0], result_list_json, centers=centers, image=original_image)
@@ -201,6 +199,14 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
         video_file_name_out: name of output video file
         result_video_json_file: file containing detection result
     """
+    try:
+      subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True)
+    except FileNotFoundError:
+    # Install ffmpeg if not found
+      st.info("Installing ffmpeg...")  # Inform the user
+              
+    subprocess.run(['apt-get', 'update', '&&', 'apt-get', 'install', '-y', 'ffmpeg'], capture_output=True, check=True)
+    st.info("ffmpeg installed successfully!")
     results = model.predict(video_file)
     model_name = model.ckpt_path.split('/')[-1].split('.')[0]
 
