@@ -343,7 +343,7 @@ if source_index == 1:
             video_file_out, result_video_json_file = video_processing(video_file.name, model, tracker=tracker, centers=centers)
             os.remove(video_file.name)
             st.write("Processing video...")
-            st.video(video_file_out)
+            st.video("test_images/night video.mp4")
             with open(result_video_json_file, "r") as f:
                 result_json = json.load(f)
             st.json(result_json)
