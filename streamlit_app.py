@@ -270,7 +270,7 @@ source_index = st.sidebar.selectbox("Select Input type", range(
 
 # Image detection section
 if source_index == 0:
-    st.header("Image Processing using YOLOv8c Dark Detector")
+    st.title("Image Processing using YOLOv8c Dark Detector")
     image_file = st.file_uploader("Upload an image 🔽", type=["jpg", "jpeg", "png"])
     process_image_button = st.button("Detect")
     process_seg_button = st.button("Click here for Segmentation result")
