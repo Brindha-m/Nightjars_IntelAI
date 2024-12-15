@@ -37,7 +37,7 @@
 ├── requirements.txt             # Dependencies
 ├── yolov8xcdark.pt              # Nightjars Pytorch model
 ├── yolov8xcdark-seg.pt          # Nightjars Segmentation Pytorch model
-├── yolov8xcdark.pt              # Nightjars Pytorch model
+├── yolov8xcdark.yaml            # Nightjars reframed/improved Architecture
 ├── yolov8xcdark_openvino_model  # Optimized Nightjars Openvino model
 └── ReferenceImages/             # Distance estimation util
 ```
