@@ -248,7 +248,7 @@ def load_model(model_path):
 
 device = "CPU"
 
-model_vino_path = Path("yolov8xcdark_openvino_model")
+model_vino_path = Path("yolov8xcdark_openvino_model/yolov8xcdark.xml")
 model_openvino = load_model(model_vino_path)
 
 # model_openvino = load_vino_model(model_vino_path, device)
