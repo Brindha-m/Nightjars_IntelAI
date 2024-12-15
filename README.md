@@ -22,6 +22,7 @@
 > #### NightJars final annotated image with distance estimation with improvisation of low illuminated scene
 
 <img width="700" alt="Screenshot_20241207_031410" src="https://github.com/user-attachments/assets/fef8b741-f36c-4de6-8337-59ab4a956fb9">
+<img width="700" src="https://github.com/user-attachments/assets/cf2a3738-2c98-49d5-9ea8-38d33bd7332a">
 
 <br>
 
@@ -29,7 +30,17 @@
 
 ![yoloarch](https://github.com/user-attachments/assets/9f176758-9dd1-4938-8a95-8b6134ce1678)
 
-
+### **Repository Structure**
+```
+├── streamlit_app.py             # Main File
+├── README.md                    # Project documentation
+├── requirements.txt             # Dependencies
+├── yolov8xcdark.pt              # Nightjars Pytorch model
+├── yolov8xcdark-seg.pt          # Nightjars Segmentation Pytorch model
+├── yolov8xcdark.pt              # Nightjars Pytorch model
+├── yolov8xcdark_openvino_model  # Optimized Nightjars Openvino model
+└── ReferenceImages/             # Distance estimation util
+```
 
 ### **Steps to Run the App**
 
