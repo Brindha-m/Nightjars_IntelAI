@@ -342,7 +342,7 @@ if source_index == 1:
     
 
 if source_index == 2:
-    st.header("Live Stream Processing using YOLOv8c Dark Detector")
+    st.header("Live Stream Processing using YOLOv8")
     tab_webcam = st.tabs(["Webcam Detections"])
     p_time = 0
 
@@ -381,7 +381,6 @@ if source_index == 2:
             max_value=20, value=3
         )
         
-        # Inference Mode
         # Web-cam
         
         cam_options = st.selectbox('Webcam Channel',
@@ -396,7 +395,7 @@ if source_index == 2:
                 stframe3 = st.empty()
                 tracker = DeepSort(max_age=5)
                 centers = [deque(maxlen=30) for _ in range(10000)]
-                
+                frame_cnt = 0  
                 
                 while True:
                     success, img = cap.read()
@@ -406,39 +405,29 @@ if source_index == 2:
                             icon="🚨"
                         )
                         break
-                              
-
- 
-                    # # Call get_yolo to get detections
-                    # img, current_no_class = get_yolo(img, model_type, model, confidence, class_labels, draw_thick)
 
                     # Call DeepSort for tracking
                     img, result_list_json = image_processing(img, model, image_viewer=view_result_default, tracker=tracker, centers=centers)
 
                     # # Call get_frame_output to overlay distance information
                     processed_frame = get_live_frame_output(img, result_list_json)
-                    
-
                   
                     # Display the processed frame
                     FRAME_WINDOW.image(processed_frame, channels='BGR')
-                    st.cache_data.clear()
-
-                    
-                    # FPS
                     c_time = time.time()
                     fps = 1 / (c_time - p_time)
                     p_time = c_time
                         
-                    # Current number of classes
-                    # Current number of classes
+                   
                     detected_classes = [item['class'] for item in result_list_json]
                     class_fq = Counter(detected_classes)
                     df_fq = pd.DataFrame(class_fq.items(), columns=['Class', 'Number'])
 
-                        # Updating Inference results
-                    get_system_stat(stframe1, stframe2, stframe3, fps, df_fq)
-                    
+                    # Updating Inference results
+                    get_system_stat(stframe1, stframe2, stframe3, fps, df_fq)             
+                    frame_cnt += 1
+
+
                     
 
 
