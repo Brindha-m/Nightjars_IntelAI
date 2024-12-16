@@ -350,7 +350,7 @@ if source_index == 2:
     # Choose the model
     model_type = "YOLOv8"
     sample_img = cv2.imread('detective.png')
-    FRAME_WINDOW = st.image(sample_img, channels='BGR')
+    FRAME_WINDOW = st.image(sample_img)
     cap = None
 
 
