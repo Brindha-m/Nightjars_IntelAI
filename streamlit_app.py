@@ -182,7 +182,7 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
 
 def video_processing(video_file, model, image_viewer=view_result_default, tracker=None, centers=None):
     results = model.predict(video_file)
-    model_name = model.ckpt_path.split('\')[-1].split('.')[0]
+    model_name = model.ckpt_path.split('/')[-1].split('.')[0]
 
     output_folder = os.path.join('output_videos', os.path.splitext(os.path.basename(video_file))[0])
     os.makedirs(output_folder, exist_ok=True)
