@@ -192,11 +192,16 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
     for file_path in [video_file_name_out, result_video_json_file]:
         if os.path.exists(file_path):
             os.remove(file_path)
-    
-    json_file = open(result_video_json_file, 'w')
+
+    # Get video FPS and dimensions
+    cap = cv2.VideoCapture(video_file)
+    fps = cap.get(cv2.CAP_PROP_FPS)
     first_frame = results[0].orig_img
     height, width = first_frame.shape[:2]
-    video_writer = cv2.VideoWriter(video_file_name_out, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
+    cap.release()
+
+    video_writer = cv2.VideoWriter(video_file_name_out, cv2.VideoWriter_fourcc(*'avc1'), fps, (width, height))
+    json_file = open(result_video_json_file, 'w')
 
     result_list = []
     frame_count = 0
@@ -204,20 +209,28 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
     for result in stqdm(results, desc="Processing video"):
         result_list_json = result_to_json(result, tracker=tracker)
         result_image = image_viewer(result, result_list_json, centers=centers)
-        
+
+        # Ensure valid frame size
+        if result_image is None:
+            raise ValueError(f"Image viewer returned None at frame {frame_count}")
+        if result_image.shape[:2] != (height, width):
+            result_image = cv2.resize(result_image, (width, height))
+
         video_writer.write(result_image)
         result_list.append(result_list_json)
         frame_count += 1
 
     json.dump(result_list, json_file, indent=2)
     json_file.close()
-
     video_writer.release()
 
     if frame_count == 0 or os.path.getsize(video_file_name_out) == 0:
         raise FileNotFoundError(f"The video file {video_file_name_out} was not created or is empty.")
 
+    print(f"Output video saved to: {video_file_name_out}")
+    print(f"Output JSON saved to: {result_video_json_file}")
     return video_file_name_out, result_video_json_file
+
           
 st.image("assets/nsidelogoo.png")
 st.sidebar.image("assets/nsidelogoo.png")
