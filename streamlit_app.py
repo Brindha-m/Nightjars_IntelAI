@@ -182,11 +182,11 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
 
 def video_processing(video_file, model, image_viewer=view_result_default, tracker=None, centers=None):
     results = model.predict(video_file)
-    model_name = model.ckpt_path.split('/')[-1].split('.')[0]
+    model_name = model.ckpt_path.split('\')[-1].split('.')[0]
 
     output_folder = os.path.join('output_videos', os.path.splitext(os.path.basename(video_file))[0])
     os.makedirs(output_folder, exist_ok=True)
-    video_file_name_out = os.path.join(output_folder, f"{video_file}_{model_name}_output.mp4")
+    video_file_name_out = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_file))[0]}_{model_name}_output.mp4")
     result_video_json_file = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_file))[0]}_{model_name}_output.json")
     
     for file_path in [video_file_name_out, result_video_json_file]:
