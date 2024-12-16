@@ -181,43 +181,45 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
 
 
 def video_processing(video_file, model, image_viewer=view_result_default, tracker=None, centers=None):
-    results = model.predict(video_file)
+    results = model.predict(video_path)
     model_name = model.ckpt_path.split('/')[-1].split('.')[0]
 
-    output_folder = os.path.join('output_videos', os.path.splitext(os.path.basename(video_file))[0])
+    output_folder = os.path.join('output_videos', os.path.splitext(os.path.basename(video_path))[0])
     os.makedirs(output_folder, exist_ok=True)
-    video_file_name_out = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_file))[0]}_{model_name}_output.mp4")
-    result_video_json_file = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_file))[0]}_{model_name}_output.json")
     
-    for file_path in [video_file_name_out, result_video_json_file]:
+    video_file_out = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_path))[0]}_{model_name}_output.mp4")
+    result_video_json_file = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_path))[0]}_{model_name}_output.json")
+
+    # Remove pre-existing files if any
+    for file_path in [video_file_out, result_video_json_file]:
         if os.path.exists(file_path):
             os.remove(file_path)
-    
-    json_file = open(result_video_json_file, 'w')
+
+    # Setup for video writing
     first_frame = results[0].orig_img
     height, width = first_frame.shape[:2]
-    video_writer = cv2.VideoWriter(video_file_name_out, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
+    video_writer = cv2.VideoWriter(video_file_out, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
 
+    # Process frames
     result_list = []
-    frame_count = 0
+    with open(result_video_json_file, 'w') as json_file:
+        for result in stqdm(results, desc="Processing video"):
+            result_list_json = result_to_json(result, tracker=tracker)
+            result_image = view_result_default(result, result_list_json, centers=centers)
 
-    for result in stqdm(results, desc="Processing video"):
-        result_list_json = result_to_json(result, tracker=tracker)
-        result_image = image_viewer(result, result_list_json, centers=centers)
-        
-        video_writer.write(result_image)
-        result_list.append(result_list_json)
-        frame_count += 1
+            video_writer.write(result_image)
+            result_list.append(result_list_json)
 
-    json.dump(result_list, json_file, indent=2)
-    json_file.close()
+        json.dump(result_list, json_file, indent=2)
 
     video_writer.release()
 
-    if frame_count == 0 or os.path.getsize(video_file_name_out) == 0:
-        raise FileNotFoundError(f"The video file {video_file_name_out} was not created or is empty.")
+    if not os.path.exists(video_file_out) or os.path.getsize(video_file_out) == 0:
+        raise FileNotFoundError(f"Video file {video_file_out} was not created or is empty!")
 
-    return video_file_name_out, result_video_json_file
+    return video_file_out, result_video_json_file
+
+
           
 st.image("assets/nsidelogoo.png")
 st.sidebar.image("assets/nsidelogoo.png")
@@ -323,22 +325,32 @@ if source_index == 1:
     st.header("Video Detections using YOLOv8c Dark Detector")
     video_file = st.file_uploader("Upload a video", type=["mp4"])
     process_video_button = st.button("Process Video")
-    if video_file is None and process_video_button:
-        st.warning("Please upload a video file to be processed!")
-    if video_file is not None and process_video_button:
-        with st.spinner(text='Detecting with 💕...'):
-            tracker = DeepSort(max_age=5)
-            centers = [deque(maxlen=30) for _ in range(10000)]
-            with open(video_file.name, "wb") as f:
-                f.write(video_file.read())
-            video_file_out, result_video_json_file = video_processing(video_file.name, model, tracker=tracker, centers=centers)
-            os.remove(video_file.name)
-            st.write("Processing video...")
-            
-            st.video(video_file_out)
-            with open(result_video_json_file, "r") as f:
-                result_json = json.load(f)
-            st.json(result_json)
+          
+          if video_file is None and process_video_button:
+              st.warning("Please upload a video file to process!")
+          
+          if video_file is not None and process_video_button:
+              with st.spinner(text="Processing video..."):
+                  tracker = DeepSort(max_age=5)
+                  centers = [deque(maxlen=30) for _ in range(10000)]
+          
+                  # Save uploaded video temporarily
+                  with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video_file:
+                      temp_video_file.write(video_file.read())
+                      video_path = temp_video_file.name
+                  
+                  video_file_out, result_video_json_file = process_video(video_path, model, tracker, centers)
+                  os.remove(video_path)  # Clean up temporary file
+          
+                  # Display output
+                  st.write("Processing complete!")
+                  st.video(video_file_out)
+          
+                  with open(result_video_json_file, "r") as f:
+                      result_json = json.load(f)
+                  st.json(result_json)
+
+      
     
 
 if source_index == 2:
