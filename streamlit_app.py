@@ -325,30 +325,32 @@ if source_index == 1:
     st.header("Video Detections using YOLOv8c Dark Detector")
     video_file = st.file_uploader("Upload a video", type=["mp4"])
     process_video_button = st.button("Process Video")
+
+    if video_file is None and process_video_button:
+        st.warning("Please upload a video file to process!")
+
+    if video_file is not None and process_video_button:
+        with st.spinner(text="Processing video..."):
+            tracker = DeepSort(max_age=5)
+            centers = [deque(maxlen=30) for _ in range(10000)]
+
+        # Save uploaded video temporarily
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video_file:
+            temp_video_file.write(video_file.read())
+            video_path = temp_video_file.name
+        
+        video_file_out, result_video_json_file = process_video(video_path, model, tracker, centers)
+        os.remove(video_path)  # Clean up temporary file
+
+        # Display output
+        st.write("Processing complete!")
+        st.video(video_file_out)
+
+        with open(result_video_json_file, "r") as f:
+            result_json = json.load(f)
+        st.json(result_json)
           
-          if video_file is None and process_video_button:
-              st.warning("Please upload a video file to process!")
-          
-          if video_file is not None and process_video_button:
-              with st.spinner(text="Processing video..."):
-                  tracker = DeepSort(max_age=5)
-                  centers = [deque(maxlen=30) for _ in range(10000)]
-          
-                  # Save uploaded video temporarily
-                  with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video_file:
-                      temp_video_file.write(video_file.read())
-                      video_path = temp_video_file.name
-                  
-                  video_file_out, result_video_json_file = process_video(video_path, model, tracker, centers)
-                  os.remove(video_path)  # Clean up temporary file
-          
-                  # Display output
-                  st.write("Processing complete!")
-                  st.video(video_file_out)
-          
-                  with open(result_video_json_file, "r") as f:
-                      result_json = json.load(f)
-                  st.json(result_json)
+    
 
       
     
