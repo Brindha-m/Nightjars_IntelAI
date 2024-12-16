@@ -186,7 +186,7 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
 
     output_folder = os.path.join('output_videos', os.path.splitext(os.path.basename(video_file))[0])
     os.makedirs(output_folder, exist_ok=True)
-    video_file_name_out = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_file))[0]}_{model_name}_output.mp4")
+    video_file_name_out = os.path.join(output_folder, f"{video_file}_{model_name}_output.mp4")
     result_video_json_file = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_file))[0]}_{model_name}_output.json")
     
     for file_path in [video_file_name_out, result_video_json_file]:
@@ -332,7 +332,7 @@ if source_index == 1:
             centers = [deque(maxlen=30) for _ in range(10000)]
             with open(video_file.name, "wb") as f:
                 f.write(video_file.read())
-            video_file_out, result_video_json_file = video_processing(video_file, model, tracker=tracker, centers=centers)
+            video_file_out, result_video_json_file = video_processing(video_file.name, model, tracker=tracker, centers=centers)
             os.remove(video_file.name)
             st.write("Processing video...")
             st.write(video_file_out)
