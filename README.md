@@ -8,6 +8,7 @@
 
 > #### 👉🏻 [Jupyter notebook intel® tiber™ ai developer cloud 🔗](https://jupyter-batch-us-region-1.cloud.intel.com/hub/user-redirect/lab/tree/Nightjars_intel_bindascode.ipynb)
 
+> #### Try it either on 1️⃣[Nightjars - Streamlit](https://nightjars-brindha.streamlit.app/) 2️⃣[Nightjars - HuggingfaceSpace](https://huggingface.co/spaces/brindhamanick/Nightjars)
 <br>
 
 **Goal & Motivation** : Image enhancement specially in the Low-light conditions & Thermal Imaging. Live distance estimation, Tracking with DeepSort and Count of the objects under low-light environment
