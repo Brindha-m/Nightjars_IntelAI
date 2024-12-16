@@ -340,7 +340,7 @@ if source_index == 1:
             temp_video_file.write(video_file.read())
             video_path = temp_video_file.name
         
-        video_file_out, result_video_json_file = process_video(video_path, model, tracker, centers)
+        video_file_out, result_video_json_file = video_processing(video_path, model, tracker, centers)
         os.remove(video_path)  # Clean up temporary file
 
         # Display output
