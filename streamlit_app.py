@@ -506,13 +506,13 @@ if source_index == 3:
                     # Call DeepSort for tracking
                     img, result_list_json = image_processing(img, model, image_viewer=view_result_default, tracker=tracker, centers=centers)
 
-                    # # Call get_frame_output to overlay distance information
+                    # Call get_frame_output to overlay distance information
                     processed_frame = get_live_frame_output(img, result_list_json)
                     
-                  
+                    processed_frame_rgb = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
                     # Display the processed frame
-                    FRAME_WINDOW.image(processed_frame, channels='BGR')
-
+                    FRAME_WINDOW.image(processed_frame_rgb, channels='RGB')
+                   
                     # FPS
                     c_time = time.time()
                     fps = 1 / (c_time - p_time)
