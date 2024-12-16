@@ -349,7 +349,7 @@ if source_index == 2:
     st.sidebar.title('Settings')
     # Choose the model
     model_type = "YOLOv8"
-    sample_img = cv2.imread('detective.png')
+    sample_img = cv2.imread('assets/detective.png')
     FRAME_WINDOW = st.image(sample_img)
     cap = None
 
