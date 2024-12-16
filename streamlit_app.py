@@ -8,6 +8,7 @@ import numpy as np
 import cv2
 import json
 import subprocess
+import tempfile
 
 from deep_sort_realtime.deepsort_tracker import DeepSort
 from _collections import deque
