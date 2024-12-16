@@ -9,7 +9,7 @@
 > #### 👉🏻 [Jupyter notebook intel® tiber™ ai developer cloud 🔗](https://jupyter-batch-us-region-1.cloud.intel.com/hub/user-redirect/lab/tree/Nightjars_intel_bindascode.ipynb)
 
 > #### Deployment - Try it either on 1️⃣[Nightjars - Streamlit](https://nightjars-brindha.streamlit.app/) 2️⃣[Nightjars - HuggingfaceSpace](https://huggingface.co/spaces/brindhamanick/Nightjars)
- ###### `* The live webcam feature may sometimes not work on deployment; running it locally is recommended.`
+ ###### `* The live webcam feature may sometimes not work on deployment due to memory constrains; running it locally is recommended.`
 
 <br>
 
