@@ -180,7 +180,13 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
     return result_image, result_list_json
 
 
+import os
+import cv2
+import json
+from tqdm import tqdm
+
 def video_processing(video_file, model, image_viewer=view_result_default, tracker=None, centers=None):
+    # Set up file paths
     results = model.predict(video_file)
     model_name = os.path.splitext(os.path.basename(model.ckpt_path))[0]
 
@@ -191,41 +197,42 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
     video_file_name_out = os.path.join(output_folder, f"{video_name}_{model_name}_output.mp4")
     result_video_json_file = os.path.join(output_folder, f"{video_name}_{model_name}_output.json")
 
+    # Remove old files if they exist
     for file_path in [video_file_name_out, result_video_json_file]:
         if os.path.exists(file_path):
             os.remove(file_path)
 
+    # Get video properties
     cap = cv2.VideoCapture(video_file)
     if not cap.isOpened():
         raise FileNotFoundError(f"Failed to open video file: {video_file}")
-
+    
     fps = cap.get(cv2.CAP_PROP_FPS)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     cap.release()
 
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_writer = cv2.VideoWriter(video_file_name_out, fourcc, fps, (width, height))
-
+    # Initialize video writer
+    video_writer = cv2.VideoWriter(video_file_name_out, cv2.VideoWriter_fourcc(*'mp4v'), fps, (width, height))
     result_list = []
     frame_count = 0
-    frames = []  # Collect frames for fallback
 
     try:
         with open(result_video_json_file, 'w') as json_file:
             for result in tqdm(results, desc="Processing video"):
+                # Convert results and render the frame
                 result_list_json = result_to_json(result, tracker=tracker)
                 result_image = image_viewer(result, result_list_json, centers=centers)
-                
+
                 if result_image is None:
-                    print(f"Warning: Skipping frame {frame_count} due to invalid image.")
+                    print(f"Warning: Skipping invalid frame {frame_count}.")
                     continue
 
+                # Ensure resolution matches video properties
                 if result_image.shape[:2] != (height, width):
                     result_image = cv2.resize(result_image, (width, height))
 
                 video_writer.write(result_image)
-                frames.append(result_image)  # Save frame for fallback
                 result_list.append(result_list_json)
                 frame_count += 1
 
@@ -236,36 +243,12 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
     finally:
         video_writer.release()
 
-    if frame_count == 0 or os.path.getsize(video_file_name_out) == 0:
-        print("Warning: OpenCV VideoWriter failed. Attempting fallback using FFmpeg...")
-        ffmpeg_fallback(video_file_name_out, output_folder, fps, frames)
+    # Check if the video was created successfully
+    if frame_count == 0 or not os.path.exists(video_file_name_out) or os.path.getsize(video_file_name_out) == 0:
+        raise RuntimeError("Video processing failed. Output file is empty or invalid.")
 
-    print(f"Video processing completed successfully: {video_file_name_out}")
+    print(f"Video successfully processed: {video_file_name_out}")
     return video_file_name_out, result_video_json_file
-
-
-def ffmpeg_fallback(output_video, output_folder, fps, frames):
-    """
-    Fallback mechanism to generate video using FFmpeg.
-    Saves processed frames and generates a video using FFmpeg.
-    """
-    print("Generating video with FFmpeg...")
-    frame_folder = os.path.join(output_folder, "frames")
-    os.makedirs(frame_folder, exist_ok=True)
-
-    # Save frames as images for FFmpeg
-    for idx, frame in enumerate(frames):
-        frame_path = os.path.join(frame_folder, f"frame_{idx:04d}.png")
-        cv2.imwrite(frame_path, frame)
-
-    # Generate video using FFmpeg
-    ffmpeg_command = [
-        "ffmpeg", "-y", "-r", str(fps), "-i", f"{frame_folder}/frame_%04d.png",
-        "-c:v", "libx264", "-pix_fmt", "yuv420p", output_video
-    ]
-    subprocess.run(ffmpeg_command, check=True)
-    print(f"Video successfully generated using FFmpeg: {output_video}")
-
 
           
 st.image("assets/nsidelogoo.png")
