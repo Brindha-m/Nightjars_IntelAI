@@ -180,71 +180,45 @@ def image_processing(frame, model, image_viewer=view_result_default, tracker=Non
     return result_image, result_list_json
 
 
-import os
-import cv2
-import json
-from tqdm import tqdm
-
 def video_processing(video_file, model, image_viewer=view_result_default, tracker=None, centers=None):
-    # Set up file paths
     results = model.predict(video_file)
-    model_name = os.path.splitext(os.path.basename(model.ckpt_path))[0]
+    model_name = model.ckpt_path.split('/')[-1].split('.')[0]
 
-    video_name = os.path.splitext(os.path.basename(video_file))[0]
-    output_folder = os.path.join("output_videos", video_name)
+    output_folder = os.path.join('output_videos', os.path.splitext(os.path.basename(video_file))[0])
     os.makedirs(output_folder, exist_ok=True)
-
-    video_file_name_out = os.path.join(output_folder, f"{video_name}_{model_name}_output.mp4")
-    result_video_json_file = os.path.join(output_folder, f"{video_name}_{model_name}_output.json")
-
-    # Get video properties
-    cap = cv2.VideoCapture(video_file)
-    if not cap.isOpened():
-        raise FileNotFoundError(f"Failed to open video file: {video_file}")
+    video_file_name_out = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_file))[0]}_{model_name}_output.mp4")
+    result_video_json_file = os.path.join(output_folder, f"{os.path.splitext(os.path.basename(video_file))[0]}_{model_name}_output.json")
     
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    cap.release()
+    for file_path in [video_file_name_out, result_video_json_file]:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+    
+    json_file = open(result_video_json_file, 'w')
+    first_frame = results[0].orig_img
+    height, width = first_frame.shape[:2]
+    video_writer = cv2.VideoWriter(video_file_name_out, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
 
-    # Initialize video writer
-    video_writer = cv2.VideoWriter(video_file_name_out, cv2.VideoWriter_fourcc(*'mp4v'), fps, (width, height))
     result_list = []
     frame_count = 0
 
-    try:
-        with open(result_video_json_file, 'w') as json_file:
-            for result in tqdm(results, desc="Processing video"):
-                # Convert results and render the frame
-                result_list_json = result_to_json(result, tracker=tracker)
-                result_image = image_viewer(result, result_list_json, centers=centers)
+    for result in stqdm(results, desc="Processing video"):
+        result_list_json = result_to_json(result, tracker=tracker)
+        result_image = image_viewer(result, result_list_json, centers=centers)
+        
+        video_writer.write(result_image)
+        result_list.append(result_list_json)
+        frame_count += 1
 
-                if result_image is None:
-                    print(f"Warning: Skipping invalid frame {frame_count}.")
-                    continue
+    json.dump(result_list, json_file, indent=2)
+    json_file.close()
 
-                # Ensure resolution matches video properties
-                if result_image.shape[:2] != (height, width):
-                    result_image = cv2.resize(result_image, (width, height))
+    video_writer.release()
 
-                video_writer.write(result_image)
-                result_list.append(result_list_json)
-                frame_count += 1
+    if frame_count == 0 or os.path.getsize(video_file_name_out) == 0:
+        raise FileNotFoundError(f"The video file {video_file_name_out} was not created or is empty.")
 
-            json.dump(result_list, json_file, indent=2)
-
-    except Exception as e:
-        print(f"Error during video processing: {e}")
-    finally:
-        video_writer.release()
-
-    # Check if the video was created successfully
-    if frame_count == 0 or not os.path.exists(video_file_name_out) or os.path.getsize(video_file_name_out) == 0:
-        raise RuntimeError("Video processing failed. Output file is empty or invalid.")
-
-    print(f"Video successfully processed: {video_file_name_out}")
     return video_file_name_out, result_video_json_file
-
+          
           
 st.image("assets/nsidelogoo.png")
 st.sidebar.image("assets/nsidelogoo.png")
@@ -362,7 +336,7 @@ if source_index == 1:
             os.remove(video_file.name)
             st.write("Processing video...")
             st.write(video_file_out)
-            st.video(video_file_out)
+            st.video(video_file_out.read())
             with open(result_video_json_file, "r") as f:
                 result_json = json.load(f)
             st.json(result_json)
