@@ -201,7 +201,7 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
     result_list = []
     frame_count = 0
 
-    for result in stqdm(results, desc="Processing video"):
+    for result in tqdm(results, desc="Processing video"):
         result_list_json = result_to_json(result, tracker=tracker)
         result_image = image_viewer(result, result_list_json, centers=centers)
         
