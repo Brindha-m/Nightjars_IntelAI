@@ -18,6 +18,7 @@ av
 numpy
 opencv-python-headless
 stqdm
+tqdm
 deep-sort-realtime
 
 #setuptools
