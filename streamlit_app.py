@@ -197,11 +197,6 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
     video_file_name_out = os.path.join(output_folder, f"{video_name}_{model_name}_output.mp4")
     result_video_json_file = os.path.join(output_folder, f"{video_name}_{model_name}_output.json")
 
-    # Remove old files if they exist
-    for file_path in [video_file_name_out, result_video_json_file]:
-        if os.path.exists(file_path):
-            os.remove(file_path)
-
     # Get video properties
     cap = cv2.VideoCapture(video_file)
     if not cap.isOpened():
