@@ -219,7 +219,6 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
 
     return video_file_name_out, result_video_json_file
           
-          
 st.image("assets/nsidelogoo.png")
 st.sidebar.image("assets/nsidelogoo.png")
 
