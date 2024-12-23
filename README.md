@@ -11,6 +11,7 @@
 > #### Deployment - Try it either on 1️⃣[Nightjars - Streamlit](https://nightjars-brindha.streamlit.app/) 2️⃣[Nightjars - HuggingfaceSpace](https://huggingface.co/spaces/brindhamanick/Nightjars)
  ###### `* The live webcam feature may sometimes not work on deployment due to memory constrains; running it locally is recommended.`
 
+>  ##### [Training notebook](https://colab.research.google.com/drive/1jmEjzTWvBuwUd3HRHM1Cxt1_oPin_MuU?usp=sharing)
 
 <br>
 
@@ -27,7 +28,6 @@
 
 <img width="700" alt="Screenshot_20241207_031410" src="https://github.com/user-attachments/assets/fef8b741-f36c-4de6-8337-59ab4a956fb9">
 <img width="700" src="https://github.com/user-attachments/assets/cf2a3738-2c98-49d5-9ea8-38d33bd7332a">
->  ##### [Training notebook](https://colab.research.google.com/drive/1jmEjzTWvBuwUd3HRHM1Cxt1_oPin_MuU?usp=sharing)
 
 <br>
 
