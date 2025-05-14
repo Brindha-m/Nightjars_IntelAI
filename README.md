@@ -4,7 +4,9 @@
 
 ## Night Jars - The Dark Detector Using Intel AI Optimizataion Tools 
 
-> #### 👉🏻 [Colab notebook🔗](https://colab.research.google.com/drive/1oVe-88LOAtx-HLJsvrhuNWzKaY4QZ2uE?usp=sharing)
+> #### 👉🏻 [Colab notebook with distance estimation🔗](https://colab.research.google.com/drive/17NutIjhBXX-UrJ3EQzXdvrb6yEBAojtz?usp=sharing) 
+
+> #### 👉🏻 [Colab notebook without distance estimation🔗](https://colab.research.google.com/drive/1oVe-88LOAtx-HLJsvrhuNWzKaY4QZ2uE?usp=sharing)
 
 > #### 👉🏻 [Jupyter notebook intel® tiber™ ai developer cloud 🔗](https://jupyter-batch-us-region-1.cloud.intel.com/hub/user-redirect/lab/tree/Nightjars_intel_bindascode.ipynb)
 
