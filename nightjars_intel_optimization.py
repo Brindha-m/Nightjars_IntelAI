@@ -23,7 +23,6 @@ import numpy as np
 import torch
 from collections import deque, Counter
 import modin.pandas as pd
-import subprocess
 import streamlit as st
 import openvino.runtime as ov
 from pathlib import Path
@@ -361,20 +360,16 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
             else:
                 result_video_json_file = file_path
 
+    # Get video properties from the first frame
+    first_frame = results[0].orig_img
+    height, width = first_frame.shape[:2]
+
+    # Initialize video writer using OpenCV
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video_writer = cv2.VideoWriter(video_file_name_out, fourcc, 30.0, (width, height))
+
     # Open JSON file with proper context manager
     with open(result_video_json_file, 'w') as json_file:
-        first_frame = results[0].orig_img
-        height, width = first_frame.shape[:2]
-
-        # Initialize ffmpeg process
-        process = subprocess.Popen(
-            ['ffmpeg', '-y', '-f', 'rawvideo', '-vcodec', 'rawvideo',
-             '-s', f'{width}x{height}', '-pix_fmt', 'bgr24', '-r', '30',
-             '-i', '-', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p',
-             video_file_name_out],
-            stdin=subprocess.PIPE
-        )
-
         result_list = []
         frame_count = 0
 
@@ -386,7 +381,8 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
                 # Add distance estimation
                 result_image = get_distance_info(result_list_json, result_image, model.focal_lengths)
 
-                process.stdin.write(result_image.tobytes())
+                # Write frame to video
+                video_writer.write(result_image)
                 result_list.append(result_list_json)
                 frame_count += 1
 
@@ -398,8 +394,7 @@ def video_processing(video_file, model, image_viewer=view_result_default, tracke
             raise
         finally:
             # Ensure proper cleanup
-            process.stdin.close()
-            process.wait()
+            video_writer.release()
 
     if frame_count == 0 or os.path.getsize(video_file_name_out) == 0:
         raise FileNotFoundError(f"The video file {video_file_name_out} was not created or is empty.")
